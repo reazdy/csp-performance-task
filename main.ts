@@ -7,8 +7,30 @@ function spriteGrow (points: number, gameTime: number) {
         foodVX += -5
         obstacleVX += -3
     }
+    if (Math.percentChance(20)) {
+        obstacleVX += 20
+        playerVY += 20
+    }
     for (let index = 0; index < points; index++) {
         trainList.push(sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . 3 3 3 3 3 3 3 3 . . . . 
+            . . . 3 d 3 3 3 3 3 3 c 3 . . . 
+            . . 3 c d 3 3 3 3 3 3 c c 3 . . 
+            . 3 c c d d d d d d 3 c c d 3 d 
+            . 3 c 3 a a a a a a a b c d 3 3 
+            . 3 3 a b b a b b b a a b d 3 3 
+            . 3 a b b b a b b b b a 3 3 3 3 
+            . a a 3 3 3 a 3 3 3 3 3 a 3 3 3 
+            . a a a a a a f a a a f a 3 d d 
+            . a a a a a a f a a f a a a 3 d 
+            . a a a a a a f f f a a a a a a 
+            . a f f f f a a a a f f f a a a 
+            . . f f f f f a a f f f f f a . 
+            . . . f f f . . . . f f f f . . 
+            . . . . . . . . . . . . . . . . 
+            `, SpriteKind.traincar))
+        sprites.destroy(sprites.create(img`
             . . . . . . . . . . . . . . . . 
             . . . . 3 3 3 3 3 3 3 3 . . . . 
             . . . 3 d 3 3 3 3 3 3 c 3 . . . 
@@ -34,11 +56,21 @@ function spriteShorten (pointValue: number, time: number) {
         foodVX += -5
         obstacleVX += -3
     }
-    for (let index = 0; index <= pointValue - 1; index++) {
-        trainList.removeAt(index)
+    if (Math.percentChance(20)) {
+        obstacleVX += -20
+        playerVY += -20
+    }
+    for (let index = 0; index < pointValue; index++) {
+        sprites.destroy(trainList.pop())
         info.changeLifeBy(-1)
     }
 }
+sprites.onDestroyed(SpriteKind.Food, function (sprite) {
+    newFood = sprites.create(foodSprites._pickRandom(), SpriteKind.Food)
+    newFood.setVelocity(foodVX, 0)
+    newFood.setPosition(150, randint(10, 110))
+    newFood.setFlag(SpriteFlag.AutoDestroy, true)
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
     if (otherSprite.image == img`
@@ -115,10 +147,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite, othe
         spritePoints = 1
     }
     spriteShorten(spritePoints, game.runtime())
-    newObstacle = sprites.create(obstacleSprites._pickRandom(), SpriteKind.obstacle)
-    newObstacle.setVelocity(foodVX, 0)
-    newObstacle.setPosition(150, randint(10, 110))
-    pause(500)
+})
+info.onLifeZero(function () {
+    game.gameOver(false)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
@@ -164,19 +195,22 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         spritePoints = 1
     }
     spriteGrow(spritePoints, game.runtime())
-    newFood = sprites.create(foodSprites._pickRandom(), SpriteKind.Food)
-    newFood.setVelocity(foodVX, 0)
-    newFood.setPosition(150, randint(10, 110))
-    pause(500)
 })
-let newFood: Sprite = null
-let newObstacle: Sprite = null
+sprites.onDestroyed(SpriteKind.obstacle, function (sprite) {
+    newObstacle = sprites.create(obstacleSprites._pickRandom(), SpriteKind.obstacle)
+    newObstacle.setVelocity(foodVX, 0)
+    newObstacle.setPosition(150, randint(10, 110))
+    newObstacle.setFlag(SpriteFlag.AutoDestroy, true)
+})
 let spritePoints = 0
+let newObstacle: Sprite = null
+let newFood: Sprite = null
 let foodVX = 0
 let trainList: Sprite[] = []
 let foodSprites: Image[] = []
 let obstacleSprites: Image[] = []
 game.splash("Avoid the Obstacles!")
+game.splash("Hit the food to grow!")
 scroller.setLayerImage(scroller.BackgroundLayer.Layer0, img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999111111111119999999999999999999999999999999999999991111999999999999999999999999999999999999999999111111111111
@@ -481,7 +515,9 @@ let mySprite = sprites.create(img`
 let train = mySprite
 train.setStayInScreen(true)
 train.setPosition(80, 70)
-controller.moveSprite(train, 100, 100)
+let playerVX = 100
+let playerVY = 100
+controller.moveSprite(train, playerVX, playerVY)
 trainList = []
 for (let index = 0; index < 3; index++) {
     trainList.push(sprites.create(img`
@@ -509,48 +545,17 @@ for (let value of trainList) {
     value.setPosition(startx, starty)
 }
 startx += -16
-let first = sprites.create(img`
-    . . . . . . c c c . . . . . . . 
-    . . . . . . c 5 b c . . . . . . 
-    . . . . c c c 5 5 c c c . . . . 
-    . . c c c c 5 5 5 5 c b c c . . 
-    . c b b 5 b 5 5 5 5 b 5 b b c . 
-    . c b 5 5 b b 5 5 b b 5 5 b c . 
-    . . c 5 5 5 b b b b 5 5 5 f . . 
-    . . f f 5 5 5 5 5 5 5 5 f f . . 
-    . . f f f b f e e f b f f f . . 
-    . . f f f 1 f b b f 1 f f f . . 
-    . . . f f b b b b b b f f . . . 
-    . . . e e f e e e e f e e . . . 
-    . . e b f b 5 b b 5 b c b e . . 
-    . . e e f 5 5 5 5 5 5 f e e . . 
-    . . . . c b 5 5 5 5 b c . . . . 
-    . . . . . f f f f f f . . . . . 
-    `, SpriteKind.obstacle)
-first.setPosition(150, 70)
-first.setVelocity(-26, 0)
-let firstFood = sprites.create(img`
-    . . . . . . b b b b a a . . . . 
-    . . . . b b d d d 3 3 3 a a . . 
-    . . . b d d d 3 3 3 3 3 3 a a . 
-    . . b d d 3 3 3 3 3 3 3 3 3 a . 
-    . b 3 d 3 3 3 3 3 b 3 3 3 3 a b 
-    . b 3 3 3 3 3 a a 3 3 3 3 3 a b 
-    b 3 3 3 3 3 a a 3 3 3 3 d a 4 b 
-    b 3 3 3 3 b a 3 3 3 3 3 d a 4 b 
-    b 3 3 3 3 3 3 3 3 3 3 d a 4 4 e 
-    a 3 3 3 3 3 3 3 3 3 d a 4 4 4 e 
-    a 3 3 3 3 3 3 3 d d a 4 4 4 e . 
-    a a 3 3 3 d d d a a 4 4 4 e e . 
-    . e a a a a a a 4 4 4 4 e e . . 
-    . . e e b b 4 4 4 4 b e e . . . 
-    . . . e e e e e e e e . . . . . 
-    . . . . . . . . . . . . . . . . 
-    `, SpriteKind.Food)
-firstFood.setPosition(170, 20)
-firstFood.setVelocity(-40, 0)
 let obstacleVX = -15
 foodVX = -40
+info.setLife(4)
+newFood = sprites.create(foodSprites._pickRandom(), SpriteKind.Food)
+newFood.setVelocity(foodVX, 0)
+newFood.setPosition(150, randint(10, 110))
+newObstacle = sprites.create(obstacleSprites._pickRandom(), SpriteKind.obstacle)
+newObstacle.setVelocity(foodVX, 0)
+newObstacle.setPosition(150, randint(10, 110))
+newFood.setFlag(SpriteFlag.AutoDestroy, true)
+newObstacle.setFlag(SpriteFlag.AutoDestroy, true)
 forever(function () {
     startx = train.x
     starty = train.y
