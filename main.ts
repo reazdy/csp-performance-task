@@ -73,7 +73,7 @@ sprites.onDestroyed(SpriteKind.Food, function (sprite) {
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
-    if (otherSprite.image == img`
+    if (otherSprite.image.equals(img`
         ....................e2e22e2e....................
         .................222eee22e2e222.................
         ..............222e22e2e22eee22e222..............
@@ -122,9 +122,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite, othe
         ....644444444c66f4e44e44e44e44ee66c444444446....
         .....64eee444c66f4e44e44e44e44ee66c444eee46.....
         ......6ccc666c66e4e44e44e44e44ee66c666ccc6......
-        `) {
+        `)) {
         spritePoints = 3
-    } else if (otherSprite.image == img`
+    } else if (otherSprite.image.equals(img`
         . . . . . . . c c c . . . . . . 
         . . . . . . c b 5 c . . . . . . 
         . . . . c c c 5 5 c c c . . . . 
@@ -141,7 +141,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite, othe
         . . e e f 5 5 5 5 5 5 f e e . . 
         . . . . c b 5 5 5 5 b c . . . . 
         . . . . . f f f f f f . . . . . 
-        `) {
+        `)) {
         spritePoints = 2
     } else {
         spritePoints = 1
@@ -153,7 +153,7 @@ info.onLifeZero(function () {
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
-    if (otherSprite.image == img`
+    if (otherSprite.image.equals(img`
         . . . . c c c b b b b b . . . . 
         . . c c b 4 4 4 4 4 4 b b b . . 
         . c c 4 4 4 4 4 5 4 4 4 4 b c . 
@@ -170,9 +170,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         e e b e c c e e e e e c e b e e 
         . e e b b 4 4 4 4 4 4 4 4 e e . 
         . . . c c c c c e e e e e . . . 
-        `) {
+        `)) {
         spritePoints = 3
-    } else if (otherSprite.image == img`
+    } else if (otherSprite.image.equals(img`
         . . . . . . . e e e e . . . . . 
         . . . . . e e 4 5 5 5 e e . . . 
         . . . . e 4 5 6 2 2 7 6 6 e . . 
@@ -189,7 +189,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         4 5 4 e 5 5 5 5 e e . . . . . . 
         . 4 5 4 5 5 4 e . . . . . . . . 
         . . 4 4 e e e . . . . . . . . . 
-        `) {
+        `)) {
         spritePoints = 2
     } else {
         spritePoints = 1
