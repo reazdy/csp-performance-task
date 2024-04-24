@@ -2,13 +2,17 @@ namespace SpriteKind {
     export const traincar = SpriteKind.create()
     export const obstacle = SpriteKind.create()
 }
+// spriteGrow increases the length of the train by some amount depending on which food was eaten
+// 
+// It also increases the speed of food and obstacles after 20 seconds and increases player and obstacle speed depending on a 20% chance
+// 
 function spriteGrow (points: number, gameTime: number) {
     if (gameTime > 20000) {
         foodVX += -5
         obstacleVX += -3
     }
     if (Math.percentChance(20)) {
-        obstacleVX += 20
+        obstacleVX += -20
         playerVY += 20
     }
     for (let index = 0; index < points; index++) {
@@ -51,6 +55,9 @@ function spriteGrow (points: number, gameTime: number) {
         info.changeLifeBy(1)
     }
 }
+// spriteShorten is almost identical to spriteGrow except it removes sprites from the train
+// 
+// It also increases the speed of food and obstacles after 20 seconds like spriteGrow, and randomly increases the speed of obstacles and the player
 function spriteShorten (pointValue: number, time: number) {
     if (time > 20000) {
         foodVX += -5
@@ -58,7 +65,7 @@ function spriteShorten (pointValue: number, time: number) {
     }
     if (Math.percentChance(20)) {
         obstacleVX += -20
-        playerVY += -20
+        playerVY += 20
     }
     for (let index = 0; index < pointValue; index++) {
         sprites.destroy(trainList.pop())
@@ -71,7 +78,58 @@ sprites.onDestroyed(SpriteKind.Food, function (sprite) {
     newFood.setPosition(150, randint(10, 110))
     newFood.setFlag(SpriteFlag.AutoDestroy, true)
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite, otherSprite) {
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite3, otherSprite2) {
+    sprites.destroy(otherSprite2)
+    if (otherSprite2.image.equals(img`
+        . . . . c c c b b b b b . . . . 
+        . . c c b 4 4 4 4 4 4 b b b . . 
+        . c c 4 4 4 4 4 5 4 4 4 4 b c . 
+        . e 4 4 4 4 4 4 4 4 4 5 4 4 e . 
+        e b 4 5 4 4 5 4 4 4 4 4 4 4 b c 
+        e b 4 4 4 4 4 4 4 4 4 4 5 4 4 e 
+        e b b 4 4 4 4 4 4 4 4 4 4 4 b e 
+        . e b 4 4 4 4 4 5 4 4 4 4 b e . 
+        8 7 e e b 4 4 4 4 4 4 b e e 6 8 
+        8 7 2 e e e e e e e e e e 2 7 8 
+        e 6 6 2 2 2 2 2 2 2 2 2 2 6 c e 
+        e c 6 7 6 6 7 7 7 6 6 7 6 c c e 
+        e b e 8 8 c c 8 8 c c c 8 e b e 
+        e e b e c c e e e e e c e b e e 
+        . e e b b 4 4 4 4 4 4 4 4 e e . 
+        . . . c c c c c e e e e e . . . 
+        `)) {
+        spritePoints = 3
+    } else if (otherSprite2.image.equals(img`
+        . . . . . . . e e e e . . . . . 
+        . . . . . e e 4 5 5 5 e e . . . 
+        . . . . e 4 5 6 2 2 7 6 6 e . . 
+        . . . e 5 6 6 7 2 2 6 4 4 4 e . 
+        . . e 5 2 2 7 6 6 4 5 5 5 5 4 . 
+        . e 5 6 2 2 8 8 5 5 5 5 5 4 5 4 
+        . e 5 6 7 7 8 5 4 5 4 5 5 5 5 4 
+        e 4 5 8 6 6 5 5 5 5 5 5 4 5 5 4 
+        e 5 c e 8 5 5 5 4 5 5 5 5 5 5 4 
+        e 5 c c e 5 4 5 5 5 4 5 5 5 e . 
+        e 5 c c 5 5 5 5 5 5 5 5 4 e . . 
+        e 5 e c 5 4 5 4 5 5 5 e e . . . 
+        e 5 e e 5 5 5 5 5 4 e . . . . . 
+        4 5 4 e 5 5 5 5 e e . . . . . . 
+        . 4 5 4 5 5 4 e . . . . . . . . 
+        . . 4 4 e e e . . . . . . . . . 
+        `)) {
+        spritePoints = 2
+    } else {
+        spritePoints = 1
+    }
+    spriteGrow(spritePoints, game.runtime())
+})
+sprites.onDestroyed(SpriteKind.obstacle, function (sprite4) {
+    newObstacle = sprites.create(obstacleSprites._pickRandom(), SpriteKind.obstacle)
+    newObstacle.setVelocity(foodVX, 0)
+    newObstacle.setPosition(150, randint(10, 110))
+    newObstacle.setFlag(SpriteFlag.AutoDestroy, true)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite2, otherSprite) {
     sprites.destroy(otherSprite)
     if (otherSprite.image.equals(img`
         ....................e2e22e2e....................
@@ -150,57 +208,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.obstacle, function (sprite, othe
 })
 info.onLifeZero(function () {
     game.gameOver(false)
-})
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
-    sprites.destroy(otherSprite)
-    if (otherSprite.image.equals(img`
-        . . . . c c c b b b b b . . . . 
-        . . c c b 4 4 4 4 4 4 b b b . . 
-        . c c 4 4 4 4 4 5 4 4 4 4 b c . 
-        . e 4 4 4 4 4 4 4 4 4 5 4 4 e . 
-        e b 4 5 4 4 5 4 4 4 4 4 4 4 b c 
-        e b 4 4 4 4 4 4 4 4 4 4 5 4 4 e 
-        e b b 4 4 4 4 4 4 4 4 4 4 4 b e 
-        . e b 4 4 4 4 4 5 4 4 4 4 b e . 
-        8 7 e e b 4 4 4 4 4 4 b e e 6 8 
-        8 7 2 e e e e e e e e e e 2 7 8 
-        e 6 6 2 2 2 2 2 2 2 2 2 2 6 c e 
-        e c 6 7 6 6 7 7 7 6 6 7 6 c c e 
-        e b e 8 8 c c 8 8 c c c 8 e b e 
-        e e b e c c e e e e e c e b e e 
-        . e e b b 4 4 4 4 4 4 4 4 e e . 
-        . . . c c c c c e e e e e . . . 
-        `)) {
-        spritePoints = 3
-    } else if (otherSprite.image.equals(img`
-        . . . . . . . e e e e . . . . . 
-        . . . . . e e 4 5 5 5 e e . . . 
-        . . . . e 4 5 6 2 2 7 6 6 e . . 
-        . . . e 5 6 6 7 2 2 6 4 4 4 e . 
-        . . e 5 2 2 7 6 6 4 5 5 5 5 4 . 
-        . e 5 6 2 2 8 8 5 5 5 5 5 4 5 4 
-        . e 5 6 7 7 8 5 4 5 4 5 5 5 5 4 
-        e 4 5 8 6 6 5 5 5 5 5 5 4 5 5 4 
-        e 5 c e 8 5 5 5 4 5 5 5 5 5 5 4 
-        e 5 c c e 5 4 5 5 5 4 5 5 5 e . 
-        e 5 c c 5 5 5 5 5 5 5 5 4 e . . 
-        e 5 e c 5 4 5 4 5 5 5 e e . . . 
-        e 5 e e 5 5 5 5 5 4 e . . . . . 
-        4 5 4 e 5 5 5 5 e e . . . . . . 
-        . 4 5 4 5 5 4 e . . . . . . . . 
-        . . 4 4 e e e . . . . . . . . . 
-        `)) {
-        spritePoints = 2
-    } else {
-        spritePoints = 1
-    }
-    spriteGrow(spritePoints, game.runtime())
-})
-sprites.onDestroyed(SpriteKind.obstacle, function (sprite) {
-    newObstacle = sprites.create(obstacleSprites._pickRandom(), SpriteKind.obstacle)
-    newObstacle.setVelocity(foodVX, 0)
-    newObstacle.setPosition(150, randint(10, 110))
-    newObstacle.setFlag(SpriteFlag.AutoDestroy, true)
 })
 let spritePoints = 0
 let newObstacle: Sprite = null
@@ -559,8 +566,8 @@ newObstacle.setFlag(SpriteFlag.AutoDestroy, true)
 forever(function () {
     startx = train.x
     starty = train.y
-    for (let value of trainList) {
+    for (let value2 of trainList) {
         startx += -16
-        value.setPosition(startx, starty)
+        value2.setPosition(startx, starty)
     }
 })
